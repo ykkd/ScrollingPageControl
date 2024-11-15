@@ -35,16 +35,33 @@ open class ScrollingPageControl: UIView {
 	}
 	//	The index of the currently selected page
 	open var selectedPage: Int = 0 {
-		didSet {
-			guard selectedPage != oldValue else { return }
-			selectedPage = max(0, min (selectedPage, pages - 1))
-			updateColors()
-			if (0..<centerDots).contains(selectedPage - pageOffset) {
-				centerOffset = selectedPage - pageOffset
-			} else {
-				pageOffset = selectedPage - centerOffset
-			}
-		}
+	    didSet {
+	        guard selectedPage != oldValue else { return }
+	        selectedPage = max(0, min(selectedPage, pages - 1))
+	        
+	        // 最初と最後のページ間での循環を検出
+	        if oldValue == pages - 1 && selectedPage == 0 {
+	            // 最終ページから最初のページに切り替わった場合
+	            pageOffset = 0
+	            centerOffset = 0
+	            updatePositions() // 初期状態にリセット
+	        } else if oldValue == 0 && selectedPage == pages - 1 {
+	            // 最初のページから最終ページに切り替わった場合
+	            pageOffset = max(0, pages - maxDots)
+	            centerOffset = maxDots - centerDots
+	            updatePositions() // 初期状態にリセット
+	        } else {
+	            // 通常のページ遷移処理
+	            if (0..<centerDots).contains(selectedPage - pageOffset) {
+	                centerOffset = selectedPage - pageOffset
+	            } else {
+	                pageOffset = selectedPage - centerOffset
+	            }
+	        }
+	        
+	        // 選択中のドットの色を更新
+	        updateColors()
+	    }
 	}
 	//	The maximum number of dots that will show in the control
 	open var maxDots = 7 {
