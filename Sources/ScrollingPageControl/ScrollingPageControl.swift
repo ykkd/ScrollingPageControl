@@ -169,15 +169,15 @@ open class ScrollingPageControl: UIView {
     }
     
     internal func updatePositions() {
-        guard pages > 0 else { return } // Prevent out-of-bounds access
+        guard pages > 0 else { return }
         let centerDots = min(self.centerDots, pages)
         let maxDots = min(self.maxDots, pages)
         let sidePages = (maxDots - centerDots) / 2
-        let horizontalOffset = CGFloat(-pageOffset + sidePages) * (dotSize + spacing) + (bounds.width - intrinsicContentSize.width) / 2
+        let horizontalOffset = max(0, CGFloat(-pageOffset + sidePages) * (dotSize + spacing) + (bounds.width - intrinsicContentSize.width) / 2)
         let centerPage = centerDots / 2 + pageOffset
         
         dotViews.enumerated().forEach { page, dot in
-            let center = CGPoint(x: horizontalOffset + bounds.minX + dotSize / 2 + (dotSize + spacing) * CGFloat(page), y: bounds.midY)
+            let center = CGPoint(x: min(bounds.width - dotSize / 2, max(dotSize / 2, horizontalOffset + dotSize / 2 + (dotSize + spacing) * CGFloat(page))), y: bounds.midY)
             let distance = abs(page - centerPage)
             let scale: CGFloat = {
                 if distance > (maxDots / 2) { return 0 }
