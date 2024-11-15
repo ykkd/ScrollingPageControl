@@ -96,13 +96,15 @@ open class ScrollingPageControl: UIView {
     open var slideDuration: TimeInterval = 0.15
     
     private var centerOffset = 0
-    private var pageOffset = 0 {
-        didSet {
-            UIView.animate(withDuration: slideDuration, delay: 0.15, options: [], animations: { [weak self] in
-                self?.updatePositions()
-            }, completion: nil)
-        }
-    }
+	private var pageOffset = 0 {
+	    didSet {
+	        guard pageOffset != oldValue else { return }
+	        UIView.animate(withDuration: slideDuration, delay: 0, options: [.beginFromCurrentState, .allowUserInteraction], animations: { [weak self] in
+	            self?.updatePositions()
+	        }, completion: nil)
+	    }
+	}
+
     
     internal var dotViews: [UIView] = [] {
         didSet {
