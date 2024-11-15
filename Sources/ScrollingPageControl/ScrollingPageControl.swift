@@ -167,26 +167,32 @@ open class ScrollingPageControl: UIView {
         }
     }
     
-    internal func updatePositions() {
-        guard pages > 0 else { return } // Prevent out-of-bounds access
-        let centerDots = min(self.centerDots, pages)
-        let maxDots = min(self.maxDots, pages)
-        let sidePages = (maxDots - centerDots) / 2
-        let horizontalOffset = CGFloat(-pageOffset + sidePages) * (dotSize + spacing) + (bounds.width - intrinsicContentSize.width) / 2
-        let centerPage = centerDots / 2 + pageOffset
-        
-        dotViews.enumerated().forEach { page, dot in
-            let center = CGPoint(x: horizontalOffset + bounds.minX + dotSize / 2 + (dotSize + spacing) * CGFloat(page), y: bounds.midY)
-            let distance = abs(page - centerPage)
-            let scale: CGFloat = {
-                if distance > (maxDots / 2) { return 0 }
-                let scales: [CGFloat] = [1, 0.66, 0.33, 0.16]
-                return scales[max(0, min(scales.count - 1, distance - centerDots / 2))]
-            }()
-            dot.frame = CGRect(origin: .zero, size: CGSize(width: dotSize * scale, height: dotSize * scale))
-            dot.center = center
-        }
-    }
+	internal func updatePositions() {
+	    guard pages > 0 else { return } // Prevent out-of-bounds access
+	    let centerDots = min(self.centerDots, pages)
+	    let maxDots = min(self.maxDots, pages)
+	    let sidePages = (maxDots - centerDots) / 2
+
+	    // Calculate the maximum allowed offset to prevent the dots from exceeding the bounds
+	    let maxOffset = max(0, pages - maxDots)
+	    pageOffset = min(pageOffset, maxOffset)
+
+	    let horizontalOffset = CGFloat(-pageOffset + sidePages) * (dotSize + spacing) + (bounds.width - intrinsicContentSize.width) / 2
+	    let centerPage = centerDots / 2 + pageOffset
+
+	    dotViews.enumerated().forEach { page, dot in
+	        let center = CGPoint(x: horizontalOffset + bounds.minX + dotSize / 2 + (dotSize + spacing) * CGFloat(page), y: bounds.midY)
+	        let distance = abs(page - centerPage)
+	        let scale: CGFloat = {
+	            if distance > (maxDots / 2) { return 0 }
+	            let scales: [CGFloat] = [1, 0.66, 0.33, 0.16]
+	            return scales[max(0, min(scales.count - 1, distance - centerDots / 2))]
+	        }()
+	        dot.frame = CGRect(origin: .zero, size: CGSize(width: dotSize * scale, height: dotSize * scale))
+	        dot.center = center
+	    }
+	}
+
     
     open override var intrinsicContentSize: CGSize {
         let pages = min(maxDots, self.pages)
